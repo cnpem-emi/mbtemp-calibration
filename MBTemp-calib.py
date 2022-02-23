@@ -1,4 +1,5 @@
 from serial import Serial
+import numpy as np
 
 global address
 global channel
@@ -24,6 +25,8 @@ def SendReceiveMessage(msg): #integer arguments
         answer.append(ord(next_byte))
         next_byte = connection.read(1)
 
+    #print(answer)
+
     if answer == []:
         return "Timeout passed"
     else:
@@ -35,12 +38,18 @@ def SendReceiveMessage(msg): #integer arguments
         if (answer_checksum + answer[answer_len - 1]) % 0x100 != 0:
             return "Message corrupted"
         else:
-            return (answer)
+            return answer
 
 def ReadTemp(add, channel):
     temp = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
     if temp is not str:
-        return ord(temp[4:5])
+        #print(temp)
+        return temp[4]*256 + temp[5]
+
+def ReadADvalue(add, channel):
+    ans = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
+    if ans is not str:
+        return (ans[4]*256 + ans[5]) % 0x8000
 
 def ReadAlpha(add):
     alphas = []
@@ -63,27 +72,27 @@ def ReadLinCoef(add):
 def WriteAlpha (add, value):
     MS_byte = value/256
     LS_byte = value%256
-    answer = SendReceiveMessage(add, 0x20, 0x00, 0x03, 0x08, MS_byte, LS_byte)
+    answer = SendReceiveMessage([add, 0x20, 0x00, 0x03, 0x08, MS_byte, LS_byte])
     return answer
 
 def WriteAngCoef (add, value):
     MS_byte = value/256
     LS_byte = value%256
-    answer = SendReceiveMessage(add, 0x20, 0x00, 0x03, 0x09, MS_byte, LS_byte)
+    answer = SendReceiveMessage([add, 0x20, 0x00, 0x03, 0x09, MS_byte, LS_byte])
     return answer
 
 def WriteLinCoef (add, value):
     MS_byte = value/256
     LS_byte = value%256
-    answer = SendReceiveMessage(add, 0x20, 0x00, 0x03, 0x0A, MS_byte, LS_byte)
+    answer = SendReceiveMessage([add, 0x20, 0x00, 0x03, 0x0A, MS_byte, LS_byte])
     return answer
 
 def SetReadAD(add, mode):
-    answer = SendReceiveMessage(add, 0x20, 0x00, 0x02, 0x0B, mode)
+    answer = SendReceiveMessage([add, 0x20, 0x00, 0x02, 0x0B, mode])
     return answer
 
 def SetReadMode(add, channel):
-    answer = SendReceiveMessage(add, 0x20, 0x00, 0x02, 0x0C, channel)
+    answer = SendReceiveMessage([add, 0x20, 0x00, 0x02, 0x0C, channel])
     return answer
 
 #######################################################################
@@ -96,13 +105,26 @@ temperatures = [25, 30, 35]
 SetReadMode(address, channel)
 SetReadAD(address, 0x02)
 
-ADvalues = [[None]]*3
-for t in range(3):
-    input('Start {:d}º readings?'.format(temperatures(t)))
+ADvalues = []
+y = []
+for t in temperatures:
+    input('Start {:d}º readings?'.format(t))
     for n in range(n_readings):
-        ADvalues[t].append(ReadTemp(address, channel))
+        ADvalues.append(ReadADvalue(address, channel))
+        y.append(t)
 
-return ADvalues
+print("ADVALUES:", ADvalues)
+
+x = np.array(ADvalues)
+A = np.vstack([x, np.ones(len(x))]).T
+y = np.array(y)
+print(A)
+print(y)
+k, b = np.linalg.lstsq(A, y, rcond = -1)[0]
+
+print('k = ', k)
+print('b = ', b)
+
 
 
 
