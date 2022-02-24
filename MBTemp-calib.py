@@ -41,15 +41,15 @@ def SendReceiveMessage(msg): #integer arguments
             return answer
 
 def ReadTemp(add, channel):
-    temp = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
-    if temp is not str:
+    ans = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
+    if ans is not str:
         #print(temp)
-        return temp[4]*256 + temp[5]
+        return (ans[4]*256 + ans[5])/100
 
 def ReadADvalue(add, channel):
     ans = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
     if ans is not str:
-        return (ans[4]*256 + ans[5]) % 0x8000
+        return (ans[4]*256 + ans[5]) #% 0x8000
 
 def ReadAlpha(add):
     alphas = []
@@ -70,19 +70,19 @@ def ReadLinCoef(add):
     return lins
 
 def WriteAlpha (add, value):
-    MS_byte = value/256
+    MS_byte = value//256
     LS_byte = value%256
     answer = SendReceiveMessage([add, 0x20, 0x00, 0x03, 0x08, MS_byte, LS_byte])
     return answer
 
 def WriteAngCoef (add, value):
-    MS_byte = value/256
+    MS_byte = value//256
     LS_byte = value%256
     answer = SendReceiveMessage([add, 0x20, 0x00, 0x03, 0x09, MS_byte, LS_byte])
     return answer
 
 def WriteLinCoef (add, value):
-    MS_byte = value/256
+    MS_byte = value//256
     LS_byte = value%256
     answer = SendReceiveMessage([add, 0x20, 0x00, 0x03, 0x0A, MS_byte, LS_byte])
     return answer
@@ -102,13 +102,16 @@ channel = 0x00
 n_readings = 5
 temperatures = [25, 30, 35]
 
-SetReadMode(address, channel)
-SetReadAD(address, 0x02)
+print(SetReadMode(address, channel))
+print(SetReadAD(address, 0x02))
+print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3]))
+print(SendReceiveMessage([1, 0x10, 0, 1, 0x0c, 0xe2]))
+
 
 ADvalues = []
 y = []
 for t in temperatures:
-    input('Start {:d}º readings?'.format(t))
+    input('Start {:d}º readings? (press Enter to continue)'.format(t))
     for n in range(n_readings):
         ADvalues.append(ReadADvalue(address, channel))
         y.append(t)
@@ -120,16 +123,26 @@ A = np.vstack([x, np.ones(len(x))]).T
 y = np.array(y)
 print(A)
 print(y)
-k, b = np.linalg.lstsq(A, y, rcond = -1)[0]
-
+m, c = np.linalg.lstsq(A, y, rcond = -1)[0]
+k = round(1/m, 2)
+b = round(-c, 2)
 print('k = ', k)
 print('b = ', b)
 
+WriteAngCoef(address, int(100*k))
+WriteLinCoef(address, int(100*b))
 
+print(ReadAngCoef(address))
+print(ReadLinCoef(address))
 
+SetReadMode(address, 0x08)
+SetReadAD(address, 0x00)
+print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3]))
+print(SendReceiveMessage([1, 0x10, 0, 1, 0x0c, 0xe2]))
 
-
-
+while(1):
+    input("Read temperature? (Enter to continue)")
+    print("T = {:02f}º".format(ReadTemp(address, channel)))
 
 
 '''
