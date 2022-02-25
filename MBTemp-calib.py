@@ -25,7 +25,7 @@ def SendReceiveMessage(msg): #integer arguments
         answer.append(ord(next_byte))
         next_byte = connection.read(1)
 
-    #print(answer)
+    print(answer)
 
     if answer == []:
         return "Timeout passed"
@@ -102,8 +102,10 @@ channel = 0x00
 n_readings = 5
 temperatures = [25, 30, 35]
 
-print(SetReadMode(address, channel))
-print(SetReadAD(address, 0x02))
+
+
+#SetReadMode(address, channel)
+SetReadAD(address, 0x01)
 print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3]))
 print(SendReceiveMessage([1, 0x10, 0, 1, 0x0c, 0xe2]))
 
@@ -135,10 +137,18 @@ WriteLinCoef(address, int(100*b))
 print(ReadAngCoef(address))
 print(ReadLinCoef(address))
 
-SetReadMode(address, 0x08)
+
+##############################################################################
+#TEMPERATURE READINGS
+
+input("Read temperatures?")
+
+#SetReadMode(address, 0x08)
 SetReadAD(address, 0x00)
 print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3]))
 print(SendReceiveMessage([1, 0x10, 0, 1, 0x0c, 0xe2]))
+
+
 
 while(1):
     input("Read temperature? (Enter to continue)")
