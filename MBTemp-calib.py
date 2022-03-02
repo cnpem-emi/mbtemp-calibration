@@ -102,7 +102,19 @@ channel = 0x00
 n_readings = 5
 temperatures = [25, 30, 35]
 
+print("Default parameters for calibration are:")
+print("MBTemp address: {:X}".format(address))
+print("MBTemp channel: {:d}".format(channel))
+print("T1 = {:02f}°, T2 = {:02f}°, T3 = {:02f°}".format(temperatures[0], temperatures[1], temperatures[2]))
+print("Samples for each temperature: {:d}".format(n_readings))
 
+if input("Press [Enter] to continue or [n] to change") == "n":
+    address = int(input("MBTemp address = 0x"), 16)
+    channel = int(input("Channel = 0x"), 16)
+    temperatures[0] = float(input("T1 = "))
+    temperatures[1] = float(input("T2 = "))
+    temperatures[2] = float(input("T3 = "))
+    n_readings = int(input("# of samples = ")) 
 
 #SetReadMode(address, channel)
 SetReadAD(address, 0x01)
@@ -152,7 +164,7 @@ print(SendReceiveMessage([1, 0x10, 0, 1, 0x0c, 0xe2]))
 
 while(1):
     input("Read temperature? (Enter to continue)")
-    print("T = {:02f}º".format(ReadTemp(address, channel)))
+    print("T = {:02f}°".format(ReadTemp(address, channel)))
 
 
 '''
