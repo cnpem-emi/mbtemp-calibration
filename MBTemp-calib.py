@@ -25,7 +25,7 @@ def SendReceiveMessage(msg): #integer arguments
         answer.append(ord(next_byte))
         next_byte = connection.read(1)
 
-    print(answer)
+    #print(answer)
 
     if answer == []:
         return "Timeout passed"
@@ -100,71 +100,80 @@ def SetReadMode(add, channel):
 address = 0x01
 channel = 0x00
 n_readings = 5
-temperatures = [25, 30, 35]
+temperatures = [25.0, 30.0, 35.0]
 
+# print calibration parameters
+print("=====================================================")
 print("Default parameters for calibration are:")
-print("MBTemp address: {:X}".format(address))
-print("MBTemp channel: {:d}".format(channel))
-print("T1 = {:02f}°, T2 = {:02f}°, T3 = {:02f°}".format(temperatures[0], temperatures[1], temperatures[2]))
-print("Samples for each temperature: {:d}".format(n_readings))
+print("MBTemp address: 0x{:02X}".format(address))
+print("MBTemp channel: 0x{:02X}".format(channel))
+print("T1 = {:.2f}°C, T2 = {:.2f}°C, T3 = {:.2f}°C".format(temperatures[0], temperatures[1], temperatures[2]))
+print("# of samples for each temperature: {:d}".format(n_readings))
 
-if input("Press [Enter] to continue or [n] to change") == "n":
+# change calibration parameters
+if input("Press [Enter] to continue or [n] to change: ") == "n":
+    #print("=================================================")
+    print("\nSet parameters for calibration:")
     address = int(input("MBTemp address = 0x"), 16)
     channel = int(input("Channel = 0x"), 16)
     temperatures[0] = float(input("T1 = "))
     temperatures[1] = float(input("T2 = "))
     temperatures[2] = float(input("T3 = "))
-    n_readings = int(input("# of samples = ")) 
+    n_readings = int(input("# of samples = "))
 
+# set MBTemp to read AD values
 #SetReadMode(address, channel)
 SetReadAD(address, 0x01)
-print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3]))
-print(SendReceiveMessage([1, 0x10, 0, 1, 0x0c, 0xe2]))
+#print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3])) #ckeck setting variable
+#print(SendReceiveMessage([1, 0x10, 0, 1, 0x0c, 0xe2])) #ckeck setting variable
 
-
+# read AD values
 ADvalues = []
 y = []
+print("")
 for t in temperatures:
-    input('Start {:d}º readings? (press Enter to continue)'.format(t))
+    input('Start readings for {:.2f} °C? (press Enter to continue)'.format(t))
     for n in range(n_readings):
         ADvalues.append(ReadADvalue(address, channel))
         y.append(t)
+#print("ADVALUES:", ADvalues)
 
-print("ADVALUES:", ADvalues)
-
+# coefficients calculation
 x = np.array(ADvalues)
 A = np.vstack([x, np.ones(len(x))]).T
 y = np.array(y)
-print(A)
-print(y)
+#print(A)
+#print(y)
 m, c = np.linalg.lstsq(A, y, rcond = -1)[0]
 k = round(1/m, 2)
 b = round(-c, 2)
-print('k = ', k)
-print('b = ', b)
+print("")
+print("k = ", k)
+print("b = ", b)
 
+# write calculated coefficients to MBTemp
 WriteAngCoef(address, int(100*k))
 WriteLinCoef(address, int(100*b))
 
-print(ReadAngCoef(address))
-print(ReadLinCoef(address))
+# ckeck written coefficients
+#print(ReadAngCoef(address))
+#print(ReadLinCoef(address))
 
 
 ##############################################################################
 #TEMPERATURE READINGS
 
-input("Read temperatures?")
+input("\nRead temperatures? (Enter to continue)")
 
+# set MBTemp to read temperatures
 #SetReadMode(address, 0x08)
 SetReadAD(address, 0x00)
-print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3]))
-print(SendReceiveMessage([1, 0x10, 0, 1, 0x0c, 0xe2]))
-
-
+#print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3])) #ckeck setting variable
+#print(SendReceiveMessage([1, 0x10, 0, 1, 0x0c, 0xe2])) #ckeck setting variable
 
 while(1):
-    input("Read temperature? (Enter to continue)")
-    print("T = {:02f}°".format(ReadTemp(address, channel)))
+    input("Read new temperature?")
+    print("T = {:.2f} °C".format(ReadTemp(address, channel)))
 
 
 '''
