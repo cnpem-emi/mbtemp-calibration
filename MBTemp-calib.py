@@ -3,7 +3,7 @@ import numpy as np
 
 global address
 global channel
-global n_readings
+global n_samples
 
 global connection
 connection = Serial("/dev/ttyUSB0", 115200, timeout=1)
@@ -99,7 +99,7 @@ def SetReadMode(add, channel):
 # CALIBRATION PROCEDURE
 address = 0x01
 channel = 0x00
-n_readings = 100
+n_samples = 100
 temperatures = [25.0, 30.0, 35.0]
 
 # print calibration parameters
@@ -108,7 +108,7 @@ print("Default parameters for calibration are:")
 print("MBTemp address: 0x{:02X}".format(address))
 print("MBTemp channel: 0x{:02X}".format(channel))
 print("T1 = {:.2f}°C, T2 = {:.2f}°C, T3 = {:.2f}°C".format(temperatures[0], temperatures[1], temperatures[2]))
-print("# of samples for each temperature: {:d}".format(n_readings))
+print("# of samples for each temperature: {:d}".format(n_samples))
 
 # change calibration parameters
 if input("Press [Enter] to continue or [n] to change: ") == "n":
@@ -119,13 +119,12 @@ if input("Press [Enter] to continue or [n] to change: ") == "n":
     temperatures[0] = float(input("T1 = "))
     temperatures[1] = float(input("T2 = "))
     temperatures[2] = float(input("T3 = "))
-    n_readings = int(input("# of samples = "))
+    n_samples = int(input("# of samples = "))
 
 # set MBTemp to read AD values
-#SetReadMode(address, channel)
 SetReadAD(address, 0x01)
 #print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3])) #ckeck setting variable
-#print(SendReceiveMessage([1, 0x10, 0, 1, 0x0c, 0xe2])) #ckeck setting variable
+
 
 # read AD values
 ADvalues = []
@@ -133,7 +132,8 @@ y = []
 print("")
 for t in temperatures:
     input('Start readings for {:.2f} °C? (press Enter to continue)'.format(t))
-    for n in range(n_readings):
+    print("wait...")
+    for n in range(n_samples):
         ADvalues.append(ReadADvalue(address, channel))
         y.append(t)
 #print("ADVALUES:", ADvalues)
@@ -166,10 +166,8 @@ WriteLinCoef(address, int(100*b))
 input("\nRead temperatures? (Enter to continue)")
 
 # set MBTemp to read temperatures
-#SetReadMode(address, 0x08)
 SetReadAD(address, 0x00)
-#print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3])) #ckeck setting variable
-#print(SendReceiveMessage([1, 0x10, 0, 1, 0x0c, 0xe2])) #ckeck setting variable
+#print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3])) #check setting variable
 
 while(1):
     input("Read new temperature?")
