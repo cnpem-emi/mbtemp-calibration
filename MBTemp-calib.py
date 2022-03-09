@@ -99,7 +99,7 @@ def SetReadMode(add, channel):
 # CALIBRATION PROCEDURE
 address = 0x01
 channel = 0x00
-n_readings = 5
+n_readings = 100
 temperatures = [25.0, 30.0, 35.0]
 
 # print calibration parameters
@@ -174,17 +174,3 @@ SetReadAD(address, 0x00)
 while(1):
     input("Read new temperature?")
     print("T = {:.2f} °C".format(ReadTemp(address, channel)))
-
-
-'''
-print("TEMP:", "".join(hex(byte) for byte in ReadTemp(0x01, 0x00)))
-for alpha in ReadAlpha(0x01):
-    print("ALPHA:", "".join(hex(byte) for byte in alpha))
-
-for k in ReadAngCoef(0x01):
-    print("ANGULAR:", "".join(hex(byte) for byte in k))
-
-for b in ReadLinCoef(0x01):
-    print("LINEAR:", "".join(hex(byte) for byte in b))
-#print("".join(hex(byte) for byte in SendReceiveMessage([0x01, 0x10, 0x00, 0x01, 0x00])))
-'''
