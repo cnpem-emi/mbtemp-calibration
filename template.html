@@ -14,7 +14,7 @@
 </head>
 
 <body>
-  <h1>Probability density</h1>
+  <h1>Distribution of readings</h1>
   <canvas id="freq-chart" width="160" height="50"></canvas>
   <div class="second-row">
     <button id="reset-zoom">Reset Zoom</button>
@@ -55,6 +55,7 @@ const scaleOpts = {
 
 const scales = {
     x: {
+        stacked: true,
         type: 'category',
         title: {
             display: true,
@@ -62,6 +63,7 @@ const scales = {
         },
     },
     y: {
+        stacked: true,
         title: {
             display: true,
             text: "# of Occurences",
@@ -78,7 +80,7 @@ const config = {
     type: 'bar',
     data: {
         datasets: [],
-        labels: [...Array(100).keys()],
+        labels: ${labels}
 
     },
     options: {
@@ -106,7 +108,7 @@ const colors = [' #ec7063 ', ' #a569bd ', ' #5dade2 ', ' #45b39d ',  ' #f4d03f '
 
 const data = [${0}, ${1}];
 for(let i = 0; i < 8; i++) {
-  config["data"]["datasets"].push({"data": data[i], "label": i, "backgroundColor": colors[i]});
+  config["data"]["datasets"].push({"data": data[i], "label": "ch "+i, "backgroundColor": colors[i]});
 }
 var chart = new Chart(canvas, config);
 
@@ -114,9 +116,9 @@ var chart = new Chart(canvas, config);
 let scatter_config = JSON.parse(JSON.stringify(config));
 scatter_config["data"]["datasets"] = [];
 scatter_config["type"] = "scatter";
-const scatter_data = [${0}, ${1}];
+const scatter_data = [${8}, ${9}];
 for(let i = 0; i < 8; i++) {
-  scatter_config["data"]["datasets"].push({"data": scatter_data[i], "label": i, "backgroundColor": colors[i]});
+  scatter_config["data"]["datasets"].push({"data": scatter_data[i], "label": "ch "+i, "backgroundColor": colors[i]});
 }
 var scatter_chart = new Chart(scatter_canvas, scatter_config);
 
