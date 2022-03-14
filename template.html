@@ -76,11 +76,36 @@ const scales = {
 };
 Object.keys(scales).forEach(scale => Object.assign(scales[scale], scaleOpts));
 
+const scatter_scales = {
+    x: {
+        stacked: true,
+        type: 'category',
+        title: {
+            display: true,
+            text: "real temperature",
+        },
+    },
+    y: {
+        stacked: true,
+        title: {
+            display: true,
+            text: "temperature read",
+        },
+        type: 'linear',
+        ticks: {
+            callback: (val, index, ticks) => index === 0 || index === ticks.length - 1 ? null : val,
+        },
+    },
+};
+Object.keys(scatter_scales).forEach(scale => Object.assign(scatter_scales[scale], scaleOpts));
+
 const config = {
     type: 'bar',
     data: {
         datasets: [],
-        labels: ${labels}
+        labels: ${labels},
+        categoryPercentage: 1.0,
+        barPercentage: 1.0
 
     },
     options: {
@@ -114,8 +139,10 @@ var chart = new Chart(canvas, config);
 
 
 let scatter_config = JSON.parse(JSON.stringify(config));
-scatter_config["data"]["datasets"] = [];
 scatter_config["type"] = "scatter";
+scatter_config["data"]["datasets"] = [];
+scatter_config["options"]["scales"] = scatter_scales;
+scatter_config["data"]["labels"] = ${scatter_labels};
 const scatter_data = [${8}, ${9}];
 for(let i = 0; i < 8; i++) {
   scatter_config["data"]["datasets"].push({"data": scatter_data[i], "label": "ch "+i, "backgroundColor": colors[i]});

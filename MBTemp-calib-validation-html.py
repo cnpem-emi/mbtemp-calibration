@@ -8,7 +8,7 @@ global address
 global n_samples
 global connection
 
-connection = Serial("/dev/ttyUSB0", 115200, timeout=1)
+#connection = Serial("/dev/ttyUSB0", 115200, timeout=1)
 
 def SendReceiveMessage(msg): #integer arguments
     msg_sum = 0
@@ -122,12 +122,12 @@ for ch in range(2):
     for t in range(3):
         t_min = math.floor(min(samples[ch][t]))
         t_max = math.ceil(max(samples[ch][t]))
-        bins = [float(x) for x in np.arange(t_min, t_max, 0.02)]
+        bins = [float(x) for x in np.arange(t_min, t_max, 0.01)]
         density = [int(x) for x in np.histogram(samples[ch][t], bins = bins)[0]]
         T_min = min([T_min, t_min])
         T_max = max([T_max, t_max])
         for i in range(len(density)):
-            data_hist[ch].append({"x": round(bins[i]+0.01, 2), "y": density[i]})
+            data_hist[ch].append({"x": round(bins[i], 2), "y": density[i]})
 #print(data_hist)
 
 
@@ -141,7 +141,8 @@ with open("template.html", "r") as f:
     for ch in range(2):
         html = html.replace("${"+str(ch)+"}", json.dumps(data_hist[ch]))
         html = html.replace("${"+str(ch+8)+"}", json.dumps(data[ch]))
-        html = html.replace("${labels}", json.dumps([round(float(x), 2) for x in np.arange(T_min, T_max, 0.02)]))
+        html = html.replace("${labels}", json.dumps([round(float(x), 2) for x in np.arange(T_min, T_max, 0.01)]))
+        html = html.replace("${scatter_labels}", json.dumps([x for x in range(math.floor(temperatures[0])-1, math.ceil(temperatures[2])+1, 1)]))
 
 with open("out.html", "w") as f:
     f.write(html)
