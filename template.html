@@ -131,7 +131,7 @@ const config = {
 
 const colors = [' #ec7063 ', ' #a569bd ', ' #5dade2 ', ' #45b39d ',  ' #f4d03f ', ' #dc7633 ', ' #717d7e ', '#000080']
 
-const data = [${0}, ${1}];
+const data = [${0}, ${1}, ${2}, ${3}, ${4}, ${5}, ${6}, ${7}];
 for(let i = 0; i < 8; i++) {
   config["data"]["datasets"].push({"data": data[i], "label": "ch "+i, "backgroundColor": colors[i]});
 }
@@ -143,7 +143,7 @@ scatter_config["type"] = "scatter";
 scatter_config["data"]["datasets"] = [];
 scatter_config["options"]["scales"] = scatter_scales;
 scatter_config["data"]["labels"] = ${scatter_labels};
-const scatter_data = [${8}, ${9}];
+const scatter_data = [${8}, ${9}, ${10}, ${11}, ${12}, ${13}, ${14}, ${15}];
 for(let i = 0; i < 8; i++) {
   scatter_config["data"]["datasets"].push({"data": scatter_data[i], "label": "ch "+i, "backgroundColor": colors[i]});
 }

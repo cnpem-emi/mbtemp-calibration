@@ -1,5 +1,6 @@
 from serial import Serial
 import numpy as np
+import time
 
 global address
 global channel
@@ -41,10 +42,16 @@ def SendReceiveMessage(msg): #integer arguments
             return answer
 
 def ReadTemp(add, channel):
-    ans = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
-    if ans is not str:
-        #print(temp)
-        return (ans[4]*256 + ans[5])/100
+    ans = ""
+    error_count = 0
+    while type(ans) is str:
+        ans = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
+        error_count+=1
+        if error_count >= 10:
+            print("ERROR: ", ans)
+            time.sleep(3)
+    #print(temp)
+    return (ans[4]*256 + ans[5])/100
 
 def ReadADvalue(add, channel):
     ans = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
@@ -99,8 +106,8 @@ def SetReadMode(add, channel):
 # CALIBRATION PROCEDURE
 address = 0x01
 channel = 0x00
-n_samples = 100
-temperatures = [25.0, 30.0, 35.0]
+n_samples = 30
+temperatures = [20.0, 25.0, 30.0]
 
 # print calibration parameters
 print("=====================================================")
@@ -123,6 +130,7 @@ if input("Press [Enter] to continue or [n] to change: ") == "n":
 
 # set MBTemp to read AD values
 SetReadAD(address, 0x01)
+time.sleep(2)
 #print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3])) #ckeck setting variable
 
 
@@ -136,6 +144,7 @@ for t in temperatures:
     for n in range(n_samples):
         ADvalues.append(ReadADvalue(address, channel))
         y.append(t)
+        time.sleep(0.1)
 #print("ADVALUES:", ADvalues)
 
 # coefficients calculation

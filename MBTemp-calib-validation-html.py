@@ -3,12 +3,13 @@ import numpy as np
 import json
 import csv
 import math
+import time
 
 global address
 global n_samples
 global connection
 
-#connection = Serial("/dev/ttyUSB0", 115200, timeout=1)
+connection = Serial("/dev/ttyUSB0", 115200, timeout=1)
 
 def SendReceiveMessage(msg): #integer arguments
     msg_sum = 0
@@ -43,16 +44,23 @@ def SendReceiveMessage(msg): #integer arguments
             return answer
 
 def ReadTemp(add, channel):
-    ans = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
-    if ans is not str:
+    ans = ""
+    error_count = 0
+    while type(ans) is str:
+        ans = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
+        error_count+=1
+        if error_count >= 10:
+            print("ERROR: ", ans)
+            time.sleep(3)
+    #if ans is not str:
         #print(temp)
-        return (ans[4]*256 + ans[5])/100
+    return (ans[4]*256 + ans[5])/100
 
 #######################################################################
 # VALIDATION PROCEDURE
 address = 0x01
-n_samples = 20
-temperatures = [25.0, 30.0, 35.0]
+n_samples = 50
+temperatures = [20, 25, 30]
 
 # print validation parameters
 print("=====================================================")
@@ -77,36 +85,35 @@ if input("Press [Enter] to continue or [n] to change: ") == "n":
 samples = []
 samples_ht = []
 t_high = 120
+
 print("")
 
-
-'''
-for channel in range(2):
-    input('Start readings for channel {:d}? (press Enter to continue)'.format(channel))
+for ch in range(8):
+    input('Start readings for channel x0{:d}? [Enter] to continue'.format(ch))
     samples.append([])
-    for t in range(len(temperatures)):
-        samples[channel].append([])
-        input('\tStart readings for {:.2f} °C? (press Enter to continue)'.format(temperatures[t]))
+    for t in range(3):
+        samples[ch].append([])
+        input('\tStart readings for {:.2f} °C?'.format(temperatures[t]))
         for n in range(n_samples):
-            samples[channel][t].append(ReadTemp(address, channel))
+            samples[ch][t].append(ReadTemp(address, ch))
+            time.sleep(0.1)
+        print(samples[ch][t])
 
-    # read high temperature for channel 1:
-    if channel == 0:
-        input('\tStart readings for {:d} °C? (press Enter to continue)'.format(t_high))
-        for n in range(n_samples):
-            samples_ht.append(ReadTemp(address, 0))
+# read high temperature for channel 1:
+input('Start readings for {:d} °C on channel x00? [Enter] to continue'.format(t_high))
+for n in range(n_samples):
+    samples_ht.append(ReadTemp(address, 0))
 
 '''
 # random samples
 samples.append([[24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.65, 24.65, 24.65, 24.65, 24.66, 24.66, 24.66], [28.83, 28.83, 28.83, 28.83, 28.83, 28.83, 28.83, 28.83, 28.83, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82], [32.89, 32.89, 32.89, 32.89, 32.89, 32.89, 32.88, 32.88, 32.88, 32.88, 32.9, 32.9, 32.9, 32.9, 32.9, 32.9, 32.9, 32.9, 32.9, 32.9]])
-samples.append([[24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.66, 24.65, 24.65, 24.65, 24.65, 24.66, 24.66, 24.66], [28.83, 28.83, 28.83, 28.83, 28.83, 28.83, 28.83, 28.83, 28.83, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82, 28.82], [32.89, 32.89, 32.89, 32.89, 32.89, 32.89, 32.88, 32.88, 32.88, 32.88, 32.9, 32.9, 32.9, 32.9, 32.9, 32.9, 32.9, 32.9, 32.9, 32.9]])
-#samples.append([[26.82, 26.82, 26.85, 26.85, 26.85, 26.85, 26.88, 26.88, 26.88, 26.88, 26.92, 26.92, 26.92, 26.92, 26.92, 26.96, 26.96, 26.96, 26.96, 27.01], [31.71, 31.71, 31.7, 31.7, 31.7, 31.7, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69], [36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.24, 36.24]])
+samples.append([[26.82, 26.82, 26.85, 26.85, 26.85, 26.85, 26.88, 26.88, 26.88, 26.88, 26.92, 26.92, 26.92, 26.92, 26.92, 26.96, 26.96, 26.96, 26.96, 27.01], [31.71, 31.71, 31.7, 31.7, 31.7, 31.7, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69, 31.69], [36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.25, 36.24, 36.24]])
 samples_ht = [122.78,122.30,122.12,122.76,122.01,122.19,122.98,122.29,122.02,122.59,122.06,122.53,122.11,122.58,122.29,122.31,122.36,122.68,122.58,122.79]
-
+'''
 
 # generate dataset
 data = []
-for ch in range(2):
+for ch in range(8):
     data.append([])
     for i in range(len(temperatures)):
         for j in range(n_samples):
@@ -116,8 +123,7 @@ for ch in range(2):
 data_hist = []
 T_min = temperatures[0]
 T_max = temperatures[2]
-
-for ch in range(2):
+for ch in range(8):
     data_hist.append([])
     for t in range(3):
         t_min = math.floor(min(samples[ch][t]))
@@ -130,6 +136,22 @@ for ch in range(2):
             data_hist[ch].append({"x": round(bins[i], 2), "y": density[i]})
 #print(data_hist)
 
+# write data into csv
+with open("dataset.csv", "w") as f:
+    writer = csv.writer(f)
+
+    writer.writerow(["channel", "temperature", "mean", "std deviation"])
+    for ch in range(8):
+        for t in range(3):
+            writer.writerow([ch, temperatures[t], round(np.mean(samples[ch][t]), 2), round(np.std(samples[ch][t]), 2)])
+
+
+    writer.writerow(["channel", "real temperature", "temperature read"])
+    for ch in range(8):
+        for t in range(3):
+            for i in range(n_samples):
+                writer.writerow([ch, temperatures[t], samples[ch][t][i]])
+    writer.writerow([0, t_high, round(np.mean(samples_ht), 2)])
 
 
 # plot on html file
@@ -138,7 +160,7 @@ html = ""
 with open("template.html", "r") as f:
     html = f.read()
 
-    for ch in range(2):
+    for ch in range(8):
         html = html.replace("${"+str(ch)+"}", json.dumps(data_hist[ch]))
         html = html.replace("${"+str(ch+8)+"}", json.dumps(data[ch]))
         html = html.replace("${labels}", json.dumps([round(float(x), 2) for x in np.arange(T_min, T_max, 0.01)]))
@@ -146,22 +168,3 @@ with open("template.html", "r") as f:
 
 with open("out.html", "w") as f:
     f.write(html)
-
-
-
-# write data into csv
-with open("dataset.csv", "w") as f:
-    writer = csv.writer(f)
-
-    writer.writerow(["channel", "temperature", "mean", "std deviation"])
-    for ch in range(2):
-        for t in range(3):
-            writer.writerow([ch, temperatures[t], round(np.mean(samples[ch][t]), 2), round(np.std(samples[ch][t]), 2)])
-
-
-    writer.writerow(["channel", "real temperature", "temperature read"])
-    for ch in range(2):
-        for t in range(3):
-            for i in range(n_samples):
-                writer.writerow([ch, temperatures[t], samples[ch][t][i]])
-    writer.writerow([0, t_high, round(np.mean(samples_ht), 2)])
