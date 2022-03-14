@@ -9,7 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/1.2.0/chartjs-plugin-zoom.min.js"></script>
 
   <title>
-    Energy Histogram
+    MBTemp Validation
   </title>
 </head>
 
@@ -78,7 +78,6 @@ Object.keys(scales).forEach(scale => Object.assign(scales[scale], scaleOpts));
 
 const scatter_scales = {
     x: {
-        stacked: true,
         type: 'category',
         title: {
             display: true,
@@ -86,7 +85,6 @@ const scatter_scales = {
         },
     },
     y: {
-        stacked: true,
         title: {
             display: true,
             text: "temperature read",
