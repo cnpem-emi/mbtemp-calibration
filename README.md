@@ -1,5 +1,5 @@
 # MBTemp-calibration
-Script para calibração da MBTemp.
+Script para calibração da MBTemp (repositório MBTemp: https://gitlab.cnpem.br/patricia.nallin/mbtemp).
 
 ## Funcionamento
 O script faz N medidas do canal selecionado em três temperaturas diferentes e calcula os coeficientes da equação Temperatura = (Valor do AD)/k - b através do método dos mínimos quadrados. Os coeficientes são então escritos nas respectivas variáveis da MBTemp.
