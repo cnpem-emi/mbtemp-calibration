@@ -43,20 +43,25 @@ def SendReceiveMessage(msg): #integer arguments
 
 def ReadTemp(add, channel):
     ans = ""
-    error_count = 0
+    attempts = 0
     while type(ans) is str:
         ans = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
-        error_count+=1
-        if error_count >= 10:
+        attempts += 1
+        if attempts >= 10:
             print("ERROR: ", ans)
             time.sleep(3)
-    #print(temp)
     return (ans[4]*256 + ans[5])/100
 
 def ReadADvalue(add, channel):
-    ans = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
-    if ans is not str:
-        return (ans[4]*256 + ans[5]) #% 0x8000
+    ans = ""
+    attempts = 0
+    while type(ans) is str:
+        ans = SendReceiveMessage([add, 0x10, 0x00, 0x01, channel])
+        attempts += 1
+        if attempts >= 10:
+            print("ERROR: ", ans)
+            time.sleep(3)
+    return (ans[4]*256 + ans[5])
 
 def ReadAlpha(add):
     alphas = []
@@ -151,8 +156,6 @@ for t in temperatures:
 x = np.array(ADvalues)
 A = np.vstack([x, np.ones(len(x))]).T
 y = np.array(y)
-#print(A)
-#print(y)
 m, c = np.linalg.lstsq(A, y, rcond = -1)[0]
 k = round(1/m, 2)
 b = round(-c, 2)
@@ -176,6 +179,7 @@ input("\nRead temperatures? (Enter to continue)")
 
 # set MBTemp to read temperatures
 SetReadAD(address, 0x00)
+time.sleep(2)
 #print(SendReceiveMessage([1, 0x10, 0, 1, 0x0b, 0xe3])) #check setting variable
 
 while(1):

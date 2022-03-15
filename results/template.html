@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/1.2.0/chartjs-plugin-zoom.min.js"></script>
+
+  <title>
+    MBTemp Validation
+  </title>
+</head>
+
+<body>
+  <h1>Distribution of readings</h1>
+  <canvas id="freq-chart" width="160" height="50"></canvas>
+  <div class="second-row">
+    <button id="reset-zoom">Reset Zoom</button>
+  </div>
+  <h1>Readings</h1>
+  <canvas id="scatter-chart" width="160" height="50"></canvas>
+  <div class="second-row">
+    <button id="reset-zoom-scatter">Reset Zoom</button>
+  </div>
+</body>
+
+</html>
+
+<style>
+  body {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: center;
+  }
+
+  .second-row {
+    margin-top: 0.4em;
+  }
+
+  .second-row button {
+    margin-right: 0.6em;
+  }
+</style>
+
+<script>
+var canvas = document.getElementById("freq-chart");
+var scatter_canvas = document.getElementById("scatter-chart");
+
+const scaleOpts = {
+    grid: {
+        color: 'rgba( 0, 0, 0, 0.1)',
+    },
+};
+
+const scales = {
+    x: {
+        stacked: true,
+        type: 'category',
+        title: {
+            display: true,
+            text: "temperature",
+        },
+    },
+    y: {
+        stacked: true,
+        title: {
+            display: true,
+            text: "# of Occurences",
+        },
+        type: 'linear',
+        ticks: {
+            callback: (val, index, ticks) => index === 0 || index === ticks.length - 1 ? null : val,
+        },
+    },
+};
+Object.keys(scales).forEach(scale => Object.assign(scales[scale], scaleOpts));
+
+const scatter_scales = {
+    x: {
+        type: 'category',
+        title: {
+            display: true,
+            text: "real temperature",
+        },
+    },
+    y: {
+        title: {
+            display: true,
+            text: "temperature read",
+        },
+        type: 'linear',
+        ticks: {
+            callback: (val, index, ticks) => index === 0 || index === ticks.length - 1 ? null : val,
+        },
+    },
+};
+Object.keys(scatter_scales).forEach(scale => Object.assign(scatter_scales[scale], scaleOpts));
+
+const config = {
+    type: 'bar',
+    data: {
+        datasets: [],
+        labels: ${labels},
+        categoryPercentage: 1.0,
+        barPercentage: 1.0
+
+    },
+    options: {
+        scales: scales,
+        plugins: {
+            tooltip: false,
+            zoom: {
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                    modifierKey: 'ctrl',
+                },
+                zoom: {
+                    drag: {
+                        enabled: true
+                    },
+                    mode: 'x',
+                },
+            }
+        },
+    }
+};
+
+const colors = [' #ec7063 ', ' #a569bd ', ' #5dade2 ', ' #45b39d ',  ' #f4d03f ', ' #dc7633 ', ' #717d7e ', '#000080']
+
+const data = [${0}, ${1}, ${2}, ${3}, ${4}, ${5}, ${6}, ${7}];
+for(let i = 0; i < 8; i++) {
+  config["data"]["datasets"].push({"data": data[i], "label": "ch "+i, "backgroundColor": colors[i]});
+}
+var chart = new Chart(canvas, config);
+
+
+let scatter_config = JSON.parse(JSON.stringify(config));
+scatter_config["type"] = "scatter";
+scatter_config["data"]["datasets"] = [];
+scatter_config["options"]["scales"] = scatter_scales;
+scatter_config["data"]["labels"] = ${scatter_labels};
+const scatter_data = [${8}, ${9}, ${10}, ${11}, ${12}, ${13}, ${14}, ${15}];
+for(let i = 0; i < 8; i++) {
+  scatter_config["data"]["datasets"].push({"data": scatter_data[i], "label": "ch "+i, "backgroundColor": colors[i]});
+}
+var scatter_chart = new Chart(scatter_canvas, scatter_config);
+
+window.onload = async function () {
+    document.getElementById("reset-zoom").onclick = chart.resetZoom;
+    document.getElementById("reset-zoom-scatter").onclick = scatter_chart.resetZoom;
+}
+</script>
